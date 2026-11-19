@@ -442,10 +442,51 @@ Comment-based extensions (lines beginning with semicolon):
 
 | Extension | Description |
 |-----------|-------------|
-| ;PQ: | Authentication challenge |
-| ;PR: | Authentication response |
+| ;PQ: | End user authentication challenge |
+| ;PR: | End user authentication response |
+| ;SQ: | RMS authentication challenge |
+| ;SR: | RMS authentication response |
 | ;FW: | Forward with password hash |
 | ;PM: | Pending messages notification |
+
+#### 11.4.2 Authentication mechanism
+Winlink relies on a challenge-response scheme, to avoid the transit of cleartext passwords over the air.
+
+When a client or a RMS connects to a Central Messaging Server (CMS), it performs an initial pre-authentication handshake.
+During that phase, the party who establishes that connection sends its callsign, then the well-known value "CMSTELNET".
+
+##### 11.4.2.1 Client authentication
+During the authentication phase, if the CMS determines the authentication party to be a B2 client, or after having successfully authenticated the RMS connecting on behalf of said B2 client, it sends a one-time decimal random value of 8 digits, using the `;PQ:` comment.
+
+Format: `;PQ: <8 digit challenge>\r`
+
+The B2 client answers with a `;PR:` comment with a 8 digit response, computed from the unique challenge it has received, and its account password.
+
+Format:
+`;PR: <8 digit response>\r`
+
+##### 11.4.2.2 RMS authentication
+During the pre-authentication phase, if the CMS determines the authenticating party to be a RMS Relay or Gateway, it sends a one-time decimal random value of 8 digits, using the `;SQ:` comment.
+
+Format:
+
+`;SQ: <8 digit challenge>\r`
+
+The RMS gateway answers with a `;SR:` comments with the following parameters:
+  - The 8 digits response, computed from the challenge and its account password.
+  - The frequency, in Hertz, on which the end user has initiated its connection
+  - The mode of connection.
+
+Format:
+`;SR: <8 digit response> <10 digit frequency> <mode>\r`
+
+A RMS gateway or relay SHOULD NOT transmit the `;SQ:` and `;SR:` comments over the air.
+
+If the RMS authentication fails, the CMS MAY print a reason explaining the reason justifying the refusal of service. Then it SHALL terminate the connection to the RMS.
+In turn, the RMS SHOULD transmit to its client a comment indicating the connection to the CMS has been refused.
+
+If the RMS authentication succeeds, the RMS switches to "transparent mode", relaying message flowing from one side to the other.
+The CMS then performs user authentication, as described in [section 11.4.2.1](#11421-client-authentication).
 
 ## 12. Backward Compatibility
 
