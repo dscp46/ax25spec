@@ -409,6 +409,7 @@ FC <type> <id> <usize> <csize>
 | id | Unique identifier (max 12 characters) |
 | usize | Uncompressed size in bytes |
 | csize | Compressed size in bytes |
+| 0 | Reserved field. Senders MUST set it to `0`; receivers MUST ignore its value |
 
 Unlike FA/FB proposals, FC proposals do not include sender or recipient addressing—this information is contained within the encapsulated message header.
 
